@@ -1,11 +1,9 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -20,7 +18,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
 import component.CopyButton
 import component.CustomTextField
@@ -47,120 +44,135 @@ fun App() {
             primary = PurpleBlue,
         )
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Background)
-                .padding(24.dp)
-                .verticalScroll(rememberScrollState())
+        val scrollState = rememberScrollState()
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                CustomTextField(
-                    text = inputDependencyText,
-                    labelText = "Paste ur dependencies here"
-                ) { inputDependencyText = it }
-
-                CustomTextField(
-                    text = inputPluginText,
-                    labelText = "Paste ur plugins here"
-                ) { inputPluginText = it }
-            }
-
-            Button(
-                onClick = {
-                    if (inputDependencyText.isNotBlank()) {
-                        outputDependencyText = GradleCatalogUtils.convertDependencies(inputDependencyText.trim())
-                        outputDependencyTomlText = GradleCatalogUtils.convertDependenciesToToml()
-                    }
-                    if (inputPluginText.isNotBlank()) {
-                        outputPluginText = GradleCatalogUtils.convertPlugins(inputPluginText.trim())
-                        outputPluginTomlText = GradleCatalogUtils.convertPluginsToToml()
-                    }
-
-                    outputVersionsTomlText = GradleCatalogUtils.getVersionsToml()
-                },
-                colors = ButtonDefaults.buttonColors(disabledContainerColor = Color.DarkGray),
-                shape = RoundedCornerShape(12.dp),
-                enabled = inputDependencyText.isNotBlank() || inputPluginText.isNotBlank(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 190.dp)
-            ) {
-                Text("Convert", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
-
-            FlowRow(
-                horizontalArrangement = Arrangement.SpaceEvenly,
+            Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Box(contentAlignment = Alignment.TopEnd) {
-                    CustomTextField(
-                        text = outputDependencyText,
-                        labelText = "Find the updated dependencies here",
-                        readOnly = true,
-                        focusable = false
-                    ) { outputDependencyText = it }
-
-                    CopyButton(outputDependencyText)
-                }
-
-                Box(contentAlignment = Alignment.TopEnd) {
-                    CustomTextField(
-                        text = outputPluginText,
-                        labelText = "Find the updated plugins here",
-                        readOnly = true,
-                        focusable = false
-                    ) { outputPluginText = it }
-
-                    CopyButton(outputPluginText)
-                }
-
-                Box(contentAlignment = Alignment.TopEnd) {
-                    CustomTextField(
-                        text = outputVersionsTomlText,
-                        labelText = "Find the updated toml versions here",
-                        readOnly = true,
-                        focusable = false
-                    ) { outputVersionsTomlText = it }
-
-                    CopyButton(outputVersionsTomlText)
-                }
-
-                Box(contentAlignment = Alignment.TopEnd) {
-                    CustomTextField(
-                        outputDependencyTomlText,
-                        "Find the updated toml dependencies here",
-                        true,
-                        focusable = false
-                    ) { outputDependencyTomlText = it }
-
-                    CopyButton(outputDependencyTomlText)
-                }
-
-                Box(modifier = Modifier, contentAlignment = Alignment.TopEnd) {
-                    CustomTextField(
-                        text = outputPluginTomlText,
-                        labelText = "Find the updated toml plugins here",
-                        readOnly = true,
-                        focusable = false
-                    ) { outputPluginTomlText = it }
-
-                    CopyButton(outputPluginTomlText)
-                }
-            }
-
-            Button(
-                onClick = { GradleCatalogUtils.setupToml() },
-                colors = ButtonDefaults.buttonColors(disabledContainerColor = Color.DarkGray),
-                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 190.dp)
+                    .fillMaxSize()
+                    .background(Background)
+                    .padding(24.dp)
+                    .verticalScroll(scrollState)
             ) {
-                Text("Create Toml", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    CustomTextField(
+                        text = inputDependencyText,
+                        labelText = "Paste the dependencies here"
+                    ) { inputDependencyText = it }
+
+                    CustomTextField(
+                        text = inputPluginText,
+                        labelText = "Paste the plugins here"
+                    ) { inputPluginText = it }
+                }
+
+                Button(
+                    onClick = {
+                        if (inputDependencyText.isNotBlank()) {
+                            outputDependencyText = GradleCatalogUtils.convertDependencies(inputDependencyText.trim())
+                            outputDependencyTomlText = GradleCatalogUtils.convertDependenciesToToml()
+                        }
+                        if (inputPluginText.isNotBlank()) {
+                            outputPluginText = GradleCatalogUtils.convertPlugins(inputPluginText.trim())
+                            outputPluginTomlText = GradleCatalogUtils.convertPluginsToToml()
+                        }
+
+                        outputVersionsTomlText = GradleCatalogUtils.getVersionsToml()
+                    },
+                    colors = ButtonDefaults.buttonColors(disabledContainerColor = Color.DarkGray),
+                    enabled = inputDependencyText.isNotBlank() || inputPluginText.isNotBlank(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 190.dp)
+                ) {
+                    Text("Convert", fontWeight = FontWeight.Bold)
+                }
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(contentAlignment = Alignment.TopEnd) {
+                        CustomTextField(
+                            text = outputDependencyText,
+                            labelText = "Find the updated dependencies here",
+                            readOnly = true,
+                            focusable = false
+                        ) { outputDependencyText = it }
+
+                        CopyButton(outputDependencyText)
+                    }
+
+                    Box(contentAlignment = Alignment.TopEnd) {
+                        CustomTextField(
+                            text = outputPluginText,
+                            labelText = "Find the updated plugins here",
+                            readOnly = true,
+                            focusable = false
+                        ) { outputPluginText = it }
+
+                        CopyButton(outputPluginText)
+                    }
+
+                    Box(contentAlignment = Alignment.TopEnd) {
+                        CustomTextField(
+                            text = outputVersionsTomlText,
+                            labelText = "Find the updated toml versions here",
+                            readOnly = true,
+                            focusable = false
+                        ) { outputVersionsTomlText = it }
+
+                        CopyButton(outputVersionsTomlText)
+                    }
+
+                    Box(contentAlignment = Alignment.TopEnd) {
+                        CustomTextField(
+                            outputDependencyTomlText,
+                            "Find the updated toml dependencies here",
+                            true,
+                            focusable = false
+                        ) { outputDependencyTomlText = it }
+
+                        CopyButton(outputDependencyTomlText)
+                    }
+
+                    Box(modifier = Modifier, contentAlignment = Alignment.TopEnd) {
+                        CustomTextField(
+                            text = outputPluginTomlText,
+                            labelText = "Find the updated toml plugins here",
+                            readOnly = true,
+                            focusable = false
+                        ) { outputPluginTomlText = it }
+
+                        CopyButton(outputPluginTomlText)
+                    }
+                }
+
+                Button(
+                    onClick = { GradleCatalogUtils.setupToml() },
+                    colors = ButtonDefaults.buttonColors(disabledContainerColor = Color.DarkGray),
+                    enabled = outputDependencyText.isNotBlank() || outputPluginText.isNotBlank(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 190.dp)
+                ) {
+                    Text("Create Toml", fontWeight = FontWeight.Bold)
+                }
             }
+
+            VerticalScrollbar(
+                adapter = rememberScrollbarAdapter(scrollState),
+                style = LocalScrollbarStyle.current.copy(
+                    hoverColor = Color.White
+                ),
+                modifier = Modifier
+                    .padding(end = 4.dp)
+                    .fillMaxHeight()
+                    .align(Alignment.CenterEnd),
+            )
         }
     }
 }

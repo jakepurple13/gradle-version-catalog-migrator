@@ -1,12 +1,13 @@
 package component
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
@@ -24,39 +25,45 @@ fun CustomTextField(
     focusable: Boolean = true,
     onValueChange: (String) -> Unit,
 ) {
-    TextField(
+    OutlinedTextField(
         value = text,
         onValueChange = onValueChange,
         label = { Text(labelText, fontStyle = FontStyle.Italic) },
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = Color.White,
-            placeholderColor = Color.White.copy(alpha = 0.4f),
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White.copy(alpha = 0.4f),
+            focusedContainerColor = TextFieldBackground,
+            unfocusedContainerColor = TextFieldBackground,
+            disabledContainerColor = TextFieldBackground,
+            focusedIndicatorColor = if (focusable) PurpleBlue else Color.Transparent,
             focusedLabelColor = Color.White,
             unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
-            focusedIndicatorColor = if (focusable) PurpleBlue else Color.Transparent,
-            backgroundColor = TextFieldBackground
+            focusedPlaceholderColor = Color.White.copy(alpha = 0.4f)
         ),
         readOnly = readOnly,
-        modifier = Modifier.clip(RoundedCornerShape(12.dp)).height(280.dp).width(378.dp)
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .height(280.dp)
+            .width(378.dp)
     )
 }
 
 @Composable
 fun CopyButton(text: String) {
-    TextButton(
+    ElevatedAssistChip(
         onClick = {
-            val clipboard = Toolkit.getDefaultToolkit().systemClipboard
-            val selection = StringSelection(text)
-            clipboard.setContents(selection, null)
+            val toolkit = Toolkit.getDefaultToolkit()
+            val clipboard = toolkit.systemClipboard
+            clipboard.setContents(StringSelection(text), null)
+            toolkit.beep()
         },
+        label = { Text("COPY", letterSpacing = (0.3).sp) },
         enabled = text.isNotBlank(),
-        colors = ButtonDefaults.buttonColors(disabledBackgroundColor = Color.DarkGray),
-        contentPadding = PaddingValues(vertical = 4.dp, horizontal = 6.dp),
-        shape = RoundedCornerShape(6.dp),
-        modifier = Modifier.padding(end = 8.dp)
-            .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
+        colors = AssistChipDefaults.elevatedAssistChipColors(
+            disabledContainerColor = Color.DarkGray
+        ),
+        modifier = Modifier
+            .padding(8.dp)
             .alpha(0.9f)
-    ) {
-        Text("COPY", fontSize = 12.sp, letterSpacing = (0.3).sp)
-    }
+    )
 }
