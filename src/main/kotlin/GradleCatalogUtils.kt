@@ -39,6 +39,19 @@ object GradleCatalogUtils {
         }
     }
 
+    fun getVersionsToml(): String {
+        return versions.entries.joinToString("\n") { (name, version) ->
+            "$name = \"$version\""
+        }
+    }
+
+    fun convertDependenciesToToml(): String {
+        return libraries.entries.joinToString("\n") { (name, groupVersionPair) ->
+            "$name = { group = \"${groupVersionPair.first}\", name = \"$name\"" +
+                    (if (groupVersionPair.second.isNotEmpty()) ", version.ref = \"${groupVersionPair.second}\" " else "") + "}"
+        }
+    }
+
     fun convertDependencies(inputString: String): String {
         dependenciesOutput.clear()
         libraries.clear()
@@ -87,6 +100,12 @@ object GradleCatalogUtils {
         dependenciesOutput.forEach { outputBuilder.append(it + '\n') }
 
         return outputBuilder.toString()
+    }
+
+    fun convertPluginsToToml(): String {
+        return pluginIds.entries.joinToString("\n") { (name, id) ->
+            "$name = { id = \"$id\", version.ref = \"$name\" }"
+        }
     }
 
     fun convertPlugins(inputString: String): String {

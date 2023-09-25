@@ -1,15 +1,16 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.window.WindowDraggableArea
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,76 +35,131 @@ import util.MINIMISE
 fun App() {
     var inputDependencyText by remember { mutableStateOf("") }
     var outputDependencyText by remember { mutableStateOf("") }
+    var outputDependencyTomlText by remember { mutableStateOf("") }
     var inputPluginText by remember { mutableStateOf("") }
     var outputPluginText by remember { mutableStateOf("") }
+    var outputPluginTomlText by remember { mutableStateOf("") }
+    var outputVersionsTomlText by remember { mutableStateOf("") }
 
     MaterialTheme(
-        colors = MaterialTheme.colors.copy(
+        colorScheme = MaterialTheme.colorScheme.copy(
             background = Background,
             primary = PurpleBlue,
-            isLight = false
         )
     ) {
         Column(
-            Modifier.fillMaxSize()
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
                 .background(Background)
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 CustomTextField(
-                    inputDependencyText,
-                    "Paste ur dependencies here"
+                    text = inputDependencyText,
+                    labelText = "Paste ur dependencies here"
                 ) { inputDependencyText = it }
 
-                CustomTextField(inputPluginText, "Paste ur plugins here") {
-                    inputPluginText = it
-                }
+                CustomTextField(
+                    text = inputPluginText,
+                    labelText = "Paste ur plugins here"
+                ) { inputPluginText = it }
             }
 
             Button(
                 onClick = {
-                    if (inputDependencyText.isNotBlank()) outputDependencyText =
-                        GradleCatalogUtils.convertDependencies(inputDependencyText.trim())
-                    if (inputPluginText.isNotBlank()) outputPluginText =
-                        GradleCatalogUtils.convertPlugins(inputPluginText.trim())
+                    if (inputDependencyText.isNotBlank()) {
+                        outputDependencyText = GradleCatalogUtils.convertDependencies(inputDependencyText.trim())
+                        outputDependencyTomlText = GradleCatalogUtils.convertDependenciesToToml()
+                    }
+                    if (inputPluginText.isNotBlank()) {
+                        outputPluginText = GradleCatalogUtils.convertPlugins(inputPluginText.trim())
+                        outputPluginTomlText = GradleCatalogUtils.convertPluginsToToml()
+                    }
 
-                    GradleCatalogUtils.setupToml()
+                    outputVersionsTomlText = GradleCatalogUtils.getVersionsToml()
                 },
-                colors = ButtonDefaults.buttonColors(disabledBackgroundColor = Color.DarkGray),
+                colors = ButtonDefaults.buttonColors(disabledContainerColor = Color.DarkGray),
                 shape = RoundedCornerShape(12.dp),
                 enabled = inputDependencyText.isNotBlank() || inputPluginText.isNotBlank(),
-                modifier = Modifier.fillMaxWidth()
-                    .padding(vertical = 16.dp, horizontal = 190.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 190.dp)
             ) {
                 Text("Convert", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
 
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-
-                Box(modifier = Modifier, contentAlignment = Alignment.TopEnd) {
+            FlowRow(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(contentAlignment = Alignment.TopEnd) {
                     CustomTextField(
-                        outputDependencyText,
-                        "Find ur updated dependencies here",
-                        true,
+                        text = outputDependencyText,
+                        labelText = "Find the updated dependencies here",
+                        readOnly = true,
                         focusable = false
                     ) { outputDependencyText = it }
 
                     CopyButton(outputDependencyText)
                 }
 
-                Box(modifier = Modifier, contentAlignment = Alignment.TopEnd) {
+                Box(contentAlignment = Alignment.TopEnd) {
                     CustomTextField(
-                        outputPluginText,
-                        "Find ur updated plugins here",
-                        true,
+                        text = outputPluginText,
+                        labelText = "Find the updated plugins here",
+                        readOnly = true,
                         focusable = false
                     ) { outputPluginText = it }
 
                     CopyButton(outputPluginText)
                 }
 
+                Box(contentAlignment = Alignment.TopEnd) {
+                    CustomTextField(
+                        text = outputVersionsTomlText,
+                        labelText = "Find the updated toml versions here",
+                        readOnly = true,
+                        focusable = false
+                    ) { outputVersionsTomlText = it }
+
+                    CopyButton(outputVersionsTomlText)
+                }
+
+                Box(contentAlignment = Alignment.TopEnd) {
+                    CustomTextField(
+                        outputDependencyTomlText,
+                        "Find the updated toml dependencies here",
+                        true,
+                        focusable = false
+                    ) { outputDependencyTomlText = it }
+
+                    CopyButton(outputDependencyTomlText)
+                }
+
+                Box(modifier = Modifier, contentAlignment = Alignment.TopEnd) {
+                    CustomTextField(
+                        text = outputPluginTomlText,
+                        labelText = "Find the updated toml plugins here",
+                        readOnly = true,
+                        focusable = false
+                    ) { outputPluginTomlText = it }
+
+                    CopyButton(outputPluginTomlText)
+                }
+            }
+
+            Button(
+                onClick = { GradleCatalogUtils.setupToml() },
+                colors = ButtonDefaults.buttonColors(disabledContainerColor = Color.DarkGray),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 190.dp)
+            ) {
+                Text("Create Toml", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
     }
@@ -112,11 +168,12 @@ fun App() {
 @Composable
 private fun WindowScope.AppWindowTitleBar(state: WindowState, onClose: () -> Unit) = WindowDraggableArea {
     Box(
-        Modifier.fillMaxWidth()
+        contentAlignment = Alignment.CenterEnd,
+        modifier = Modifier
+            .fillMaxWidth()
             .height(48.dp)
             .background(Background)
             .padding(horizontal = 16.dp),
-        contentAlignment = Alignment.CenterEnd
     ) {
         TopAppBar(
             title = {
@@ -127,24 +184,43 @@ private fun WindowScope.AppWindowTitleBar(state: WindowState, onClose: () -> Uni
                     modifier = Modifier.fillMaxWidth()
                 )
             },
-            contentColor = Color.White,
-            backgroundColor = PurpleBlue,
-            modifier = Modifier.fillMaxSize().padding(horizontal = 160.dp)
-                .clip(RoundedCornerShape(bottomStart = 100.dp, bottomEnd = 100.dp))
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = PurpleBlue,
+                titleContentColor = Color.White
+            ),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 160.dp)
+                .clip(RoundedCornerShape(bottomStart = 100.dp, bottomEnd = 100.dp)),
         )
 
-        Icon(
-            imageVector = Icons.Rounded.KeyboardArrowDown,
-            contentDescription = MINIMISE,
-            tint = Color.White,
-            modifier = Modifier.clickable { state.isMinimized = true }.padding(end = 32.dp)
-        )
+        TopAppBar(
+            title = {},
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+            ),
+            actions = {
+                IconButton(
+                    onClick = { state.isMinimized = true }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.KeyboardArrowDown,
+                        contentDescription = MINIMISE,
+                        tint = Color.White,
+                    )
+                }
 
-        Icon(
-            imageVector = Icons.Rounded.Close,
-            contentDescription = CLOSE,
-            tint = Color.White,
-            modifier = Modifier.clickable { onClose() })
+                IconButton(
+                    onClick = onClose
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Close,
+                        contentDescription = CLOSE,
+                        tint = Color.White,
+                    )
+                }
+            }
+        )
     }
 }
 
@@ -159,7 +235,7 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = APP_NAME,
         state = windowState,
-        resizable = false,
+        resizable = true,
         undecorated = true,
         icon = painterResource("gradle.svg")
     ) {

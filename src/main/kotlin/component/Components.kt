@@ -19,18 +19,20 @@ import java.awt.datatransfer.StringSelection
 @Composable
 fun CustomTextField(
     text: String,
-    placeHolderText: String,
+    labelText: String,
     readOnly: Boolean = false,
     focusable: Boolean = true,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
 ) {
     TextField(
         value = text,
         onValueChange = onValueChange,
-        placeholder = { Text(placeHolderText, fontStyle = FontStyle.Italic) },
+        label = { Text(labelText, fontStyle = FontStyle.Italic) },
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color.White,
             placeholderColor = Color.White.copy(alpha = 0.4f),
+            focusedLabelColor = Color.White,
+            unfocusedLabelColor = Color.White.copy(alpha = 0.4f),
             focusedIndicatorColor = if (focusable) PurpleBlue else Color.Transparent,
             backgroundColor = TextFieldBackground
         ),
